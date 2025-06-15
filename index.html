@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <title>당신은 생각하고 계십니까?</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <style>
+ @font-face {
+ font-family: 'OnulGoraesilExtraBold';
+ src: url('fonts/OnulGoraesil-ExtraBold.woff') format('woff');
+ font-weight: 800;
+ font-style: normal;
+ }
+ body {
+ background-color: gold;
+ color: #1D2088;
+ font-family: 'OnulGoraesilExtraBold';
+ transition: background-color 0.3s ease;
+ }
+
+ /* ----- PC용 전체 레이아웃 컨테이너 ----- */
+ #main-container {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ min-height: 100vh;
+ gap: 2rem;
+ padding: 1rem;
+ box-sizing: border-box;
+ }
+
+ /* ----- PC용 아카이브 컨테이너 스타일 ----- */
+ #archive-container {
+ width: 320px;
+ height: 90vh;
+ max-height: 800px;
+ border: 2px solid #1D2088;
+ background-color: white;
+ border-radius: 40px;
+ padding: 1.5rem;
+ display: flex;
+ flex-direction: column;
+ transition: background-color 0.3s ease, border-color 0.3s ease;
+ }
+ #archive-container h2 {
+ font-size: 1.5rem;
+ margin-bottom: 1rem;
+ flex-shrink: 0;
+ border-bottom: 2px solid #1D2088;
+ color: #1D2088;
+ padding-bottom: 0.5rem;
+ transition: border-color 0.3s ease, color 0.3s ease;
+ }
+ #archive-log-list {
+ overflow-y: auto;
+ flex-grow: 1;
+ -ms-overflow-style: none; scrollbar-width: none;
+ }
+ #archive-log-list::-webkit-scrollbar { display: none; }
+ .archive-session {
+ margin-bottom: 0.5rem;
+ border-bottom: 2px solid #1D2088;
+ transition: border-color 0.3s ease;
+ }
+ .archive-header {
+ width: 100%;
+ padding: 0.75rem 0.5rem;
+ background: none;
+ border: none;
+ color: #1D2088;
+ text-align: left;
+ font-family: 'OnulGoraesilExtraBold';
+ font-size: 1.1rem;
+ cursor: pointer;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ transition: background-color 0.2s ease, color 0.3s ease;
+ }
+ .archive-header:hover {
+ background-color: #f0f0f0;
+ }
+ .archive-header .arrow {
+ transition: transform 0.3s ease-out;
+ }
+ .archive-header.active .arrow {
+ transform: rotate(90deg);
+ }
+ .archive-content {
+ max-height: 0;
+ overflow: hidden;
+ transition: max-height 0.3s ease-out;
+ padding: 0 0.5rem;
+ }
+ .archive-content.show {
+ max-height: 500px;
+ padding-bottom: 1rem;
+ }
+ .archived-bubble {
+ background-color: white;
+ padding: 0.5rem 1rem;
+ border-radius: 1.5rem;
+ border: 2px solid #1D2088;
+ font-size: 0.9rem;
+ margin-top: 0.5rem;
+ width: fit-content;
+ max-width: 100%;
+ margin-left: auto;
+ word-break: break-all;
+ color: #1D2088;
+ transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+ }
+ /* ----- 최종 상태일 때 스타일 ----- */
+ .red-theme {
+ background-color: #cc1f1f !important;
+ }
+ .red-theme #archive-container, .red-theme #content, .red-theme .chat-bubble, .red-theme #final-message-box, .red-theme #resetBtn, .red-theme .archived-bubble {
+ background-color: #cc1f1f;
+ }
+ .red-theme #archive-container h2, .red-theme .archive-header, .red-theme #resetBtn, .red-theme #final-message-box,
+ .red-theme .chat-bubble, .red-theme .archived-bubble {
+ color: white;
+ }
+ .red-theme #archive-container, .red-theme #archive-container h2,
+ .red-theme .archive-session, .red-theme .archived-bubble,
+ .red-theme #content, .red-theme .chat-bubble, .red-theme #final-message-box,
+ .red-theme #resetBtn {
+ border-color: white;
+ }
+ .red-theme .archive-header {
+ cursor: not-allowed;
+ }
+ .red-theme .archive-header:hover, .red-theme #resetBtn:hover {
+ background-color: #a01919;
+ }
+ .red-theme #message-input::placeholder {
+ color: white;
+ opacity: 0.8;
+ }
+
+
+ /* ----- 스마트폰 UI 레이아웃 ----- */
+ #black-bg-wrapper { 
+ display: flex; 
+ justify-content: center; 
+ align-items: center;  
+ transition: background-color 0.3s ease; 
+ }
+ 
+ #content { 
+ width: 420px;
+ height: 90vh;
+ max-height: 800px;
+ display:flex; 
+ flex-direction:column; 
+ border: 2px solid #1D2088;
+ background-color: white;
+ border-radius: 40px;
+ padding: 1rem;
+ box-sizing: border-box;
+ transition: background-color 0.3s ease, border-color 0.3s ease, width 0.3s ease;
+ }
+ 
+ #chat-log-container { 
+ width: 100%; 
+ overflow-y: auto;
+ margin-top: 1rem;
+ padding-right: 0.5rem;
+ box-sizing: border-box;
+ display: flex; 
+ flex-direction: column; 
+ gap: 0.5rem; 
+ z-index: 10;
+ flex-grow: 1;
+ min-height: 0;
+ -ms-overflow-style: none; scrollbar-width: none;
+ }
+ #chat-log-container::-webkit-scrollbar { display: none; }
+
+ .chat-bubble {
+ background-color: white;
+ border: 2px solid #1D2088;
+ color: #1D2088;
+ padding: 0.5rem 1rem;
+ border-radius: 1.5rem;
+ margin-left: auto;
+ max-width: 75%;
+ width: fit-content;
+ font-family: 'OnulGoraesilExtraBold';
+ font-size: 1.08rem;
+ transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+ word-break: break-all;
+ }
+
+ /* --- 하단 컨트롤 영역 --- */
+ #bottom-controls { margin-top: auto; padding-top: 0.6rem; flex-shrink: 0; position: relative; }
+ #send-form { 
+ display: flex; 
+ gap: 0.5rem;
+ align-items: flex-start;
+ transition: opacity 0.3s ease, visibility 0.3s ease;
+ }
+ #message-input {
+ flex-grow: 1; min-width: 0; 
+ background-color: white;
+ color: #1D2088;
+ border: 2px solid #1D2088;
+ border-radius: 1.5rem;
+ padding: 0.5rem 1rem; height: 40px;
+ font-family: 'OnulGoraesilExtraBold'; font-size: 1.08rem;
+ transition: all 0.3s ease;
+ }
+ #message-input::placeholder {
+ color: #1D2088;
+ opacity: 0.7;
+ }
+  /* [수정] 입력창이 확장될 때 적용될 스타일 */
+  #message-input.expanding {
+    width: 100%;
+    /* 밀려나면서 자연스럽게 사라지도록 opacity 추가 */
+    opacity: 0;
+  }
+
+ #final-message-box {
+ display: flex; 
+ opacity: 0;
+ pointer-events: none;
+ visibility: hidden;
+ height: 40px;
+ font-size: 1.08rem; 
+ padding: 0.5rem 1rem;
+ width: 100%;
+ background-color: #cc1f1f;
+ border: 2px solid white;
+ border-radius: 1.5rem;
+ justify-content: flex-start; 
+ align-items: center;
+ font-family: 'OnulGoraesilExtraBold';
+ text-align: left;
+ transition: all 0.3s ease;
+ color: white;
+ position: absolute;
+ top: 0.6rem;
+ left: 0;
+ }
+
+ #sendBtn, #resetBtn {
+ font-family: 'OnulGoraesilExtraBold'; font-weight: 800;
+ background-color: #1D2088;
+ color: white;
+ border: 2px solid #1D2088;
+ border-radius: 1.5rem; padding: 0 1rem;
+ cursor: pointer; 
+ height: 40px;
+ flex-shrink: 0;
+ transition: all 0.2s ease-out;
+ white-space: nowrap; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ }
+ #resetBtn {
+ margin-bottom: 0.5rem;
+ align-self: flex-start;
+ }
+ #sendBtn:hover, #resetBtn:hover {
+ background-color: #14165c;
+ border-color: #14165c;
+ }
+
+ #sendBtn.kicked-out {
+ animation: kick-out 0.5s ease-out forwards;
+ }
+ @keyframes kick-out {
+ 0% {
+ transform: translateX(0);
+ opacity: 1;
+ }
+ 100% {
+ transform: translateX(150px);
+ opacity: 0;
+ }
+ }
+
+
+ @media (max-width: 1024px) {
+ #archive-container { display: none; }
+ #main-container { padding: 0; gap: 0; }
+ #black-bg-wrapper { width: 100%; padding: 0 1rem; box-sizing: border-box; }
+ #content { width: 100%; }
+ }
+
+ @media (max-width: 768px) {
+ #black-bg-wrapper { padding: 0 0.5rem; }
+ #content { height: 95vh; border-radius: 30px; padding: 0.8rem; }
+ .chat-bubble { font-size: 0.78rem !important; }
+ #message-input, #final-message-box, #sendBtn, #resetBtn { height: 32px; font-size: 0.8rem; }
+ #final-message-box { font-size: 1rem; }
+ }
+
+ @keyframes blink-caret { from,to{opacity:0} 50%{opacity:1} }
+ .typing-cursor::after { content:"";display:inline-block;width:3px;height:1.3em;
+ background-color:#1D2088; 
+ animation:blink-caret .75s step-end infinite;vertical-align:middle;margin-left:4px; }
+ .red-theme .typing-cursor::after { background-color: white; }
+ </style>
+</head>
+
+<body>
+ <div id="main-container">
+ <aside id="archive-container">
+ <h2>둘러보기</h2>
+ <div id="archive-log-list"></div>
+ </aside>
+ <div id="black-bg-wrapper">
+ <div id="content">
+ <button id="resetBtn">Reset</button>
+ <div id="chat-log-container"></div>
+ <div id="bottom-controls">
+ <form id="send-form">
+ <input type="text" id="message-input" placeholder="사유없는 텍스트를 입력해보세요..." autocomplete="off">
+ <button type="submit" id="sendBtn">전송</button>
+ </form>
+ <div id="final-message-box"></div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+<script>
+// --- 한글 타이핑 로직 (변경 없음) ---
+const HANGUL_OFFSET=0xAC00,INITIALS=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],MEDIALS=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'],FINALS=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];function decomposeChar(t){const e=t.charCodeAt(0)-HANGUL_OFFSET;if(e<0||e>11171)return[t];const o=e%28,r=(e-o)/28%21,s=Math.floor(e/588),a=[INITIALS[s],MEDIALS[r]];return o>0&&a.push(FINALS[o]),a}function combineJamo(t){if(t.length<2)return t.join("");const e=INITIALS.indexOf(t[0]),o=MEDIALS.indexOf(t[1]);if(e<0||o<0)return t.join("");const r=t.length>2?FINALS.indexOf(t[2]):0,s=HANGUL_OFFSET+588*e+28*o+r;return String.fromCharCode(s)}let isTyping=!1;async function typeKoreanEffect(t,e,o){isTyping=!0,t.innerHTML="",t.classList.add("typing-cursor");let r="";for(let s of e){if(!isTyping)break;const e=decomposeChar(s);if(e.length===1)r+=e[0],t.innerHTML=r,t.classList.remove("typing-cursor"),t.classList.add("typing-cursor"),await new Promise(t=>setTimeout(t,o));else{let s=[];for(let a of e){if(!isTyping)break;s.push(a),t.innerHTML=r+combineJamo(s),t.classList.remove("typing-cursor"),t.classList.add("typing-cursor"),await new Promise(t=>setTimeout(t,o))}r+=combineJamo(s)}}t.classList.remove("typing-cursor"),t.classList.add("typing-cursor"),isTyping=!1}
+
+// --- 애플리케이션 로직 (수정됨) ---
+const PLACEHOLDER_TEXT = "사유없는 텍스트를 입력해보세요...";
+const chatLogContainer = document.getElementById("chat-log-container"),
+ sendForm = document.getElementById("send-form"),
+ messageInput = document.getElementById("message-input"),
+ finalMessageBox = document.getElementById("final-message-box"),
+ resetBtn = document.getElementById("resetBtn"),
+ sendBtn = document.getElementById("sendBtn"),
+ contentEl = document.getElementById("content"),
+ archiveLogList = document.getElementById("archive-log-list"),
+ archiveContainer = document.getElementById("archive-container");
+
+let sentCount = 0;
+let archiveData = [];
+let isArchiveLocked = false; 
+
+function initialize() {
+ const currentLogs = Array.from(chatLogContainer.querySelectorAll('.chat-bubble'));
+ if (currentLogs.length > 0) {
+ archiveData.push({
+ timestamp: Date.now(),
+ logs: currentLogs.map(bubble => bubble.textContent)
+ });
+ renderArchive();
+ }
+
+ isTyping = false;
+ sentCount = 0;
+ isArchiveLocked = false;
+ document.body.classList.remove('red-theme'); 
+ 
+  // [수정] form의 visibility를 다시 보이도록 설정
+ sendForm.style.visibility = 'visible';
+ messageInput.disabled = false;
+ sendBtn.disabled = false;
+  
+ messageInput.value = "";
+ messageInput.placeholder = PLACEHOLDER_TEXT;
+  // 리셋 시 애니메이션 클래스 제거
+  messageInput.classList.remove('expanding');
+
+ finalMessageBox.style.opacity = '0';
+ finalMessageBox.style.visibility = 'hidden';
+ finalMessageBox.classList.remove("typing-cursor");
+ finalMessageBox.innerHTML = "";
+
+ chatLogContainer.innerHTML = "";
+   
+ sendBtn.classList.remove('kicked-out');
+ sendBtn.removeAttribute('style');
+
+ messageInput.focus();
+}
+
+function sendMessage(t) {
+ t.preventDefault();
+ const message = messageInput.value.trim();
+ if (!message || sentCount >= 10 || sendBtn.disabled) return;
+
+ const bubble = document.createElement("div");
+ bubble.className = "chat-bubble", bubble.textContent = message, chatLogContainer.appendChild(bubble), chatLogContainer.scrollTop = chatLogContainer.scrollHeight, messageInput.value = "", messageInput.focus();
+ sentCount++;
+  
+ if (sentCount >= 10) {
+    messageInput.disabled = true;
+    sendBtn.disabled = true;
+
+    // [수정] 입력창은 확장되면서 사라지고, 버튼은 튕겨나감
+    messageInput.classList.add('expanding');
+    sendBtn.classList.add('kicked-out');
+
+    // 최종 상태(빨간 화면, 메시지 박스 타이핑) 즉시 시작
+    triggerFinalState();
+
+    // [수정] 애니메이션이 끝난 후 form을 실제로 숨겨서 인터랙션 방지
+    setTimeout(() => {
+        // opacity 조절은 각 요소의 애니메이션에 맡기고, visibility만 제어
+        sendForm.style.visibility = 'hidden';
+    }, 500); // 튕겨나가는 애니메이션 시간(0.5초)에 맞춤
+ }
+}
+
+function triggerFinalState() {
+ archiveLogList.querySelectorAll('.archive-header.active').forEach(activeHeader => {
+ activeHeader.classList.remove('active');
+ activeHeader.nextElementSibling.classList.remove('show');
+ });
+
+ finalMessageBox.style.opacity = '1';
+ finalMessageBox.style.visibility = 'visible';
+
+ isArchiveLocked = true;
+ document.body.classList.add('red-theme'); 
+ 
+ typeKoreanEffect(finalMessageBox, "다음부터는 스스로 생각해보세요!", 120);
+}
+
+// 아카이브 렌더링 및 이벤트 리스너 (변경 없음)
+function renderArchive() {
+ archiveLogList.innerHTML = '';
+ archiveData.forEach( (session, index) => {
+ const sessionDiv = document.createElement('div');
+ sessionDiv.className = 'archive-session';
+ const header = document.createElement('button');
+ header.className = 'archive-header';
+ header.innerHTML = `<span>Log #${index + 1}</span><span class="arrow">▶</span>`;
+ const content = document.createElement('div');
+ content.className = 'archive-content';
+ session.logs.forEach(log => {
+ const bubble = document.createElement('div');
+ bubble.className = 'archived-bubble';
+ bubble.textContent = log;
+ content.appendChild(bubble);
+ });
+ sessionDiv.appendChild(header);
+ sessionDiv.appendChild(content);
+ archiveLogList.prepend(sessionDiv);
+ });
+}
+archiveLogList.addEventListener('click', (event) => {
+ if (isArchiveLocked) return; 
+ const header = event.target.closest('.archive-header');
+ if (!header) return;
+ const content = header.nextElementSibling;
+ const isActive = header.classList.contains('active');
+ archiveLogList.querySelectorAll('.archive-header.active').forEach(activeHeader => {
+ if (activeHeader !== header) {
+ activeHeader.classList.remove('active');
+ activeHeader.nextElementSibling.classList.remove('show');
+ }
+ });
+ header.classList.toggle('active', !isActive);
+ content.classList.toggle('show', !isActive);
+});
+sendForm.addEventListener("submit", sendMessage);
+resetBtn.addEventListener("click", initialize);
+window.onload = initialize;
+
+</script>
+</body>
+</html>
